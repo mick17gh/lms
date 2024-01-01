@@ -17,26 +17,27 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { Course } from "@prisma/client";
 
 
-interface TitleFormProps {
-    initialData:{
-        title:string;
-    };
+interface DescriptionFormProps {
+    initialData:Course;
     courseId:string;
 };
 
 const formSchema = z.object({
-    title:z.string().min(1,{
-        message:"Title is required",
+    description:z.string().min(1,{
+        message:"Description is required",
     })
 });
 
 
-const TitleForm = ({
+const DescriptionForm = ({
     initialData,
     courseId
-}: TitleFormProps) => {
+}: DescriptionFormProps) => {
 
     const [isEditing, setIsEditing] = useState(false);
 
@@ -44,7 +45,9 @@ const TitleForm = ({
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
-        defaultValues: initialData,
+        defaultValues:{
+            description: initialData?.description || ""
+        }, 
     });
 
     const{isSubmitting, isValid } = form.formState;
@@ -65,7 +68,7 @@ const TitleForm = ({
     return ( 
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course title 
+                Course Description 
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditing ?(
                         <>Cancel</>
@@ -73,7 +76,7 @@ const TitleForm = ({
                     (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
-                        Edit title
+                        Edit description
                         </>
                     )}
                     
@@ -81,8 +84,11 @@ const TitleForm = ({
 
             </div>
             {!isEditing &&(
-                <p className="text-sm mt-2">
-                    {initialData.title}
+                <p className={cn(
+                    "text-sm mt-2",
+                    !initialData.description && "text-slate-500 italic"
+                )}>
+                    {initialData.description || "No description"}
                 </p>
             )}
 
@@ -91,12 +97,12 @@ const TitleForm = ({
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
                         <FormField 
                             control={form.control}
-                            name="title"
+                            name="description"
                             render = {({ field })=>(
                                  <FormItem>
                                     <FormControl>
-                                        <Input disabled={isSubmitting}
-                                            placeholder="e.g. 'Advanced web development'"
+                                        <Textarea disabled={isSubmitting}
+                                            placeholder="e.g. 'This course is about...'"
                                             {...field} />
                                     </FormControl>
                                 <FormMessage />
@@ -119,4 +125,4 @@ const TitleForm = ({
     );
 }
  
-export default TitleForm;
+export default DescriptionForm;

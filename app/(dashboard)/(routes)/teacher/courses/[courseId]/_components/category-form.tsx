@@ -4,6 +4,8 @@ import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { Combobox } from "@/components/ui/combobox";
+
 import {
     Form,
     FormControl,
@@ -17,26 +19,27 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { Course } from "@prisma/client";
 
 
-interface TitleFormProps {
-    initialData:{
-        title:string;
-    };
+interface CategoryFormProps {
+    initialData:Course;
     courseId:string;
+    options:{ label: string; value:string}[];
 };
 
 const formSchema = z.object({
-    title:z.string().min(1,{
-        message:"Title is required",
-    })
+    categoryId:z.string().min(1),
 });
 
 
-const TitleForm = ({
+const CategoryForm = ({
     initialData,
-    courseId
-}: TitleFormProps) => {
+    courseId,
+    options,
+}: CategoryFormProps) => {
 
     const [isEditing, setIsEditing] = useState(false);
 
@@ -44,7 +47,9 @@ const TitleForm = ({
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
-        defaultValues: initialData,
+        defaultValues:{
+            categoryId: initialData?.categoryId || ""
+        }, 
     });
 
     const{isSubmitting, isValid } = form.formState;
@@ -62,10 +67,12 @@ const TitleForm = ({
         }
     }
 
+    const selectedOption = options.find((option) => option.value === initialData.categoryId);
+
     return ( 
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Course title 
+                Course Category 
                 <Button onClick={toggleEdit} variant="ghost">
                     {isEditing ?(
                         <>Cancel</>
@@ -73,7 +80,7 @@ const TitleForm = ({
                     (
                         <>
                         <Pencil className="h-4 w-4 mr-2"/>
-                        Edit title
+                        Edit category
                         </>
                     )}
                     
@@ -81,8 +88,11 @@ const TitleForm = ({
 
             </div>
             {!isEditing &&(
-                <p className="text-sm mt-2">
-                    {initialData.title}
+                <p className={cn(
+                    "text-sm mt-2",
+                    !initialData.categoryId && "text-slate-500 italic"
+                )}>
+                    {selectedOption?.label || "No category"}
                 </p>
             )}
 
@@ -91,13 +101,15 @@ const TitleForm = ({
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
                         <FormField 
                             control={form.control}
-                            name="title"
+                            name="categoryId"
                             render = {({ field })=>(
                                  <FormItem>
                                     <FormControl>
-                                        <Input disabled={isSubmitting}
-                                            placeholder="e.g. 'Advanced web development'"
-                                            {...field} />
+                                        <Combobox
+                                            options = {...options}
+                                            {...field}
+                                        />
+                                      
                                     </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -119,4 +131,4 @@ const TitleForm = ({
     );
 }
  
-export default TitleForm;
+export default CategoryForm;
