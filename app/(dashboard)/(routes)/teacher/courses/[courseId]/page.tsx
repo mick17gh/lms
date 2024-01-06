@@ -12,6 +12,7 @@ import CategoryForm from "./_components/category-form";
 import PriceForm from "./_components/price-form";
 import AttachmentForm from "./_components/attachement-form";
 import ChaptersForm from "./_components/chapters-form";
+import { Banner } from "@/components/banner";
 
 const CourseIdPage = async ({params}:{
     params: {courseId: string}
@@ -67,6 +68,14 @@ const CourseIdPage = async ({params}:{
     const completionText = `(${completedFields}/${totalFields})`
 
     return ( 
+        <>
+
+{!course.isPublished && (
+            <Banner variant="warning"
+            label="This chapter is not published, it will not be visible to students" />
+        )
+
+        }
         <div className="p-6">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-y-2">
@@ -161,7 +170,9 @@ const CourseIdPage = async ({params}:{
             </div>
            
         </div>
+        </>
      );
+     
 }
  
 export default CourseIdPage;
